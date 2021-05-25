@@ -8,9 +8,11 @@ This library enables a user of a Particle Argon device to provision WiFi credent
 Future functionality may include:
 - [ ] Clear, get, and set WiFi credentials on the device
 - [ ] Expose ability to turn library on and off in user code (currently it runs all the time)
+- [ ] Add callbacks for successful configuration of credentials
 
 ## Use
-Add the library to your firmware code, using the provided example code for guidance.
+1. Add this library to your project (Name: `ble-wifi-setup-manager)
+2. Implement the provided example code
 
 A functional example webpage that can be used for BLE setup, using the Chrome Web Bluetooth standard, can be found [here](https://dan-kouba.github.io/WebBLE/index.html). This code is easy to implement into your own webpage and white-labelled for customer use. 
 
