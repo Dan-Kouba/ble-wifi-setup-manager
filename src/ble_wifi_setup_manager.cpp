@@ -1,5 +1,9 @@
 #include "ble_wifi_setup_manager.h"
 
+#if PLATFORM_ID != 12 // Argon
+    #error "This library only works on the Argon!"
+#else
+
 Logger BLEWiFiSetupManagerLogger("app.BLEWiFiSetupManager");
 
 static const char * const security_strings[] = {
@@ -147,3 +151,5 @@ void BLEWiFiSetupManager::queue_msg(const uint8_t* rx_data, size_t len) {
         return;
     }
 }
+
+#endif  // PLATFORM_ID == 12
