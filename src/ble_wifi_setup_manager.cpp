@@ -26,7 +26,8 @@ static void onDataReceived(const uint8_t* rx_data, size_t len, const BlePeerDevi
 
 BLEWiFiSetupManager::BLEWiFiSetupManager() 
   : config_state(STATE_CONFIG_SETUP),
-    next_config_state(STATE_CONFIG_SETUP)
+    next_config_state(STATE_CONFIG_SETUP),
+    provisionCb(nullptr)
 {}
 
 void BLEWiFiSetupManager::setup() {
@@ -139,10 +140,14 @@ void BLEWiFiSetupManager::parse_message() {
 
                 if (!ssid.isEmpty() && !pass.isEmpty()) {
                     WiFi.setCredentials(ssid.data(), pass.data());
-                    if (WiFi.ready() || WiFi.connecting()) {
-                        WiFi.disconnect();
+                    if (provisionCb != nullptr) {
+                        provisionCb();
                     }
-                    WiFi.connect();
+                    BLEWiFiSetupManagerLogger.info("WiFi credentials set");
+                    // if (WiFi.ready() || WiFi.connecting()) {
+                    //     WiFi.disconnect();
+                    // }
+                    // WiFi.connect();
                     // TODO: send status message
                 } else {
                     BLEWiFiSetupManagerLogger.warn("Failure parsing WiFi credentials");
@@ -163,6 +168,10 @@ void BLEWiFiSetupManager::queue_msg(const uint8_t* rx_data, size_t len) {
         BLEWiFiSetupManagerLogger.trace("Added message to the queue: %s", msg_buf);
         return;
     }
+}
+
+void BLEWiFiSetupManager::setProvisionCallback(provisionCb_t* cb) {
+    provisionCb = cb;
 }
 
 #endif  // PLATFORM_ID == 12

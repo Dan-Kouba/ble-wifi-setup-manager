@@ -3,7 +3,8 @@
 
 // This example does not require the cloud so you can run it in manual mode or
 // normal cloud-connected mode
-SYSTEM_MODE(MANUAL);
+SYSTEM_MODE(AUTOMATIC);
+SYSTEM_THREAD(ENABLED);
 
 SerialLogHandler logHandler(LOG_LEVEL_WARN, {
     {"app", LOG_LEVEL_ALL},
@@ -13,8 +14,8 @@ SerialLogHandler logHandler(LOG_LEVEL_WARN, {
 
 BLEWiFiSetupManager wifi_manager;
 
-void setup() {
-	wifi_manager.setup();
+void setup() {   
+    wifi_manager.setup();
 }
 
 void loop() {

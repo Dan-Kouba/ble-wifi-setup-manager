@@ -11,6 +11,8 @@ class BLEWiFiSetupManager {
         STATE_CONFIG_PARSE_MSG,
     } ConfigState_t;
 
+    typedef void (provisionCb_t)(void);
+
     public:
         BLEWiFiSetupManager();
 
@@ -20,9 +22,13 @@ class BLEWiFiSetupManager {
         void wifi_scan_handler(WiFiAccessPoint* wap);
         void queue_msg(const uint8_t* rx_data, size_t len);
 
+        void setProvisionCallback(provisionCb_t* cb);
+
     private:
         ConfigState_t config_state;
         ConfigState_t next_config_state;
+
+        provisionCb_t *provisionCb;
 
         void parse_message();
 
