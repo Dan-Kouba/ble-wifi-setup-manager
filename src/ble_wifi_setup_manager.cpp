@@ -43,6 +43,9 @@ void BLEWiFiSetupManager::setup() {
 
     BLEWiFiSetupManagerLogger.trace("Bluetooth Address: %s", BLE.address().toString().c_str());
     BLE.on();
+
+    // WiFi must be on for this library to work
+    WiFi.on();
 }
 
 void BLEWiFiSetupManager::loop() {
@@ -54,20 +57,23 @@ void BLEWiFiSetupManager::loop() {
         }
 
         case STATE_CONFIG_IDLE: {
-            next_config_state = STATE_CONFIG_IDLE;
+            if (device_receive_msg_queue.empty()) {
+                next_config_state = STATE_CONFIG_IDLE;
+            } else {
+                next_config_state = STATE_CONFIG_PARSE_MSG;
+            }
             break;
         }
 
         case STATE_CONFIG_PARSE_MSG: {
-            parse_message();    
-            free(msg_buf);
+            parse_message();
             next_config_state = STATE_CONFIG_IDLE;
             break;
         }
     }
 
     if (config_state != next_config_state) {
-        BLEWiFiSetupManagerLogger.info("State Transition: %u -> %u", config_state, next_config_state);
+        BLEWiFiSetupManagerLogger.trace("State Transition: %u -> %u", config_state, next_config_state);
         config_state = next_config_state;
     }
 
@@ -90,9 +96,17 @@ void BLEWiFiSetupManager::wifi_scan_handler(WiFiAccessPoint* wap) {
 }
 
 void BLEWiFiSetupManager::parse_message() {
-    BLEWiFiSetupManagerLogger.info("String RX: %s", msg_buf);
+    // Pull our message off the queue, copy it locally, and free the original message
+    // Probbaly not ideal since we don't really need to copy, but since we parse and have conditional
+    // actions later, this may prevent accidental memory leaks with the addition of other conditional paths in this code 
+    // e.g. returning somewhere down below before the free() call.
+    char *msg_buf = device_receive_msg_queue.front();
+    BLEWiFiSetupManagerLogger.trace("String RX: %s", msg_buf);
+    JSONValue outerObj = JSONValue::parseCopy(msg_buf);
+    device_receive_msg_queue.pop();
+    free(msg_buf);
 
-    JSONValue outerObj = JSONValue::parse(msg_buf, msg_len);
+    // Process our received message
     JSONObjectIterator iter(outerObj);
     while(iter.next()) {
         BLEWiFiSetupManagerLogger.info("key=%s value=%s", 
@@ -120,7 +134,6 @@ void BLEWiFiSetupManager::parse_message() {
                     }
                     else {
                         BLEWiFiSetupManagerLogger.warn("Unrecognized key while parsing WiFi credentials: %s", (const char *)iter.name());
-                        return;
                     }
                 }
 
@@ -143,11 +156,11 @@ void BLEWiFiSetupManager::queue_msg(const uint8_t* rx_data, size_t len) {
     if( len > 0 ) {
         // The underlying BLE lib reuses the receive buffer, and will not terminate it properly for a string
         // Add some manual processing and properly terminate for string parsing
-        msg_buf = (char*)malloc(len+1);
+        char *msg_buf = (char*)malloc(len+1);
         memcpy(msg_buf, rx_data, len);
-        msg_buf[len] = 0;
-        msg_len = len+1;
-        config_state = STATE_CONFIG_PARSE_MSG;
+        msg_buf[len] = 0;   // Null-terminate string
+        device_receive_msg_queue.push(msg_buf);
+        BLEWiFiSetupManagerLogger.trace("Added message to the queue: %s", msg_buf);
         return;
     }
 }

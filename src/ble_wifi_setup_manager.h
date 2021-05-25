@@ -24,13 +24,11 @@ class BLEWiFiSetupManager {
         ConfigState_t config_state;
         ConfigState_t next_config_state;
 
-        char *msg_buf;
-        size_t msg_len;
         void parse_message();
 
         std::queue<WiFiAccessPoint> wifi_scan_response_queue;
+        std::queue<char*> device_receive_msg_queue;
 
         BleCharacteristic *rxCharacteristic;
-        BleCharacteristic *statCharacteristic;
         BleCharacteristic *txCharacteristic;
 };

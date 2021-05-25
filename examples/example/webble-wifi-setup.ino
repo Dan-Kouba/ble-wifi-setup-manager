@@ -5,15 +5,16 @@
 // normal cloud-connected mode
 SYSTEM_MODE(MANUAL);
 
-SerialLogHandler logHandler(LOG_LEVEL_TRACE, {
-    {"app", LOG_LEVEL_ALL}
+SerialLogHandler logHandler(LOG_LEVEL_WARN, {
+    {"app", LOG_LEVEL_ALL},
+    {"system.ctrl.ble", LOG_LEVEL_ALL},
+    {"wiring.ble", LOG_LEVEL_ALL},
 });
 
 BLEWiFiSetupManager wifi_manager;
 
 void setup() {
 	wifi_manager.setup();
-    WiFi.on();
 }
 
 void loop() {
