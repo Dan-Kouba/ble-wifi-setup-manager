@@ -3,12 +3,14 @@
 This library enables a user of a Particle Argon device to provision WiFi credentials over BLE, including the following functionality:
 1. Exposes and advertises a custom BLE service for WiFi provisioning
 2. Provides a simple JSON-based communication interface
-3. Enables scanning for nearby WiFi networks and provisioning of one of the found networks
+3. Enables scanning for nearby WiFi networks
+4. Enables a user to provision of one of the found networks
+5. Provides an optional callback function for user code to handle a provisioning event (eg. restart WiFi, connect to the cloud, etc.)
 
 Future functionality may include:
 - [ ] Clear, get, and set WiFi credentials on the device
 - [ ] Expose ability to turn library on and off in user code (currently it runs all the time)
-- [ ] Add callbacks for successful configuration of credentials
+- [x] Add callbacks for successful configuration of credentials
 
 ## Use
 1. Add this library to your project (Name: `ble-wifi-setup-manager)
