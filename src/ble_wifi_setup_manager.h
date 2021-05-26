@@ -12,19 +12,36 @@ class BLEWiFiSetupManager {
     } ConfigState_t;
 
     typedef void (provisionCb_t)(void);
+    typedef std::queue<char*> device_receive_msg_queue_t;
+    typedef std::queue<WiFiAccessPoint> wifi_scan_response_queue_t;
 
     public:
-        BLEWiFiSetupManager();
+        /**
+         * @brief Singleton class instance access for LocRecorder.
+         *
+         * @return LocRecorder&
+         */
+        static BLEWiFiSetupManager& instance() {
+            if (!_instance) {
+                _instance = new BLEWiFiSetupManager();
+            }
+            return *_instance;
+        }
 
         void setup();
         void loop();
 
         void wifi_scan_handler(WiFiAccessPoint* wap);
-        void queue_msg(const uint8_t* rx_data, size_t len);
+        void ble_data_rx_handler(const uint8_t* rx_data, size_t len);
 
         void setProvisionCallback(provisionCb_t* cb);
 
     private:
+        BLEWiFiSetupManager();
+
+        // Singleton instance
+        static BLEWiFiSetupManager* _instance;
+
         ConfigState_t config_state;
         ConfigState_t next_config_state;
 
@@ -32,8 +49,8 @@ class BLEWiFiSetupManager {
 
         void parse_message();
 
-        std::queue<WiFiAccessPoint> wifi_scan_response_queue;
-        std::queue<char*> device_receive_msg_queue;
+        wifi_scan_response_queue_t wifi_scan_response_queue;
+        device_receive_msg_queue_t device_receive_msg_queue;
 
         BleCharacteristic *rxCharacteristic;
         BleCharacteristic *txCharacteristic;

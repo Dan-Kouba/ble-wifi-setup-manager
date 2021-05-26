@@ -12,8 +12,6 @@ SerialLogHandler logHandler(LOG_LEVEL_WARN, {
     {"wiring.ble", LOG_LEVEL_ALL},
 });
 
-BLEWiFiSetupManager wifi_manager;
-
 typedef enum {
     STATE_IDLE = 0,
     STATE_PROVISIONED
@@ -29,12 +27,12 @@ void setup() {
 	provision_state      = STATE_IDLE;
     next_provision_state = STATE_IDLE;
     
-    wifi_manager.setup();
-    wifi_manager.setProvisionCallback(provisionCb);
+    BLEWiFiSetupManager::instance().setup();
+    BLEWiFiSetupManager::instance().setProvisionCallback(provisionCb);
 }
 
 void loop() {
-	wifi_manager.loop();
+	BLEWiFiSetupManager::instance().loop();
 
     // State machine to handle WiFi provisioning states
     switch(provision_state) {

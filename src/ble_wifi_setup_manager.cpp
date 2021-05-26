@@ -6,6 +6,8 @@
 
 Logger BLEWiFiSetupManagerLogger("app.BLEWiFiSetupManager");
 
+BLEWiFiSetupManager *BLEWiFiSetupManager::_instance = nullptr;
+
 static const char * const security_strings[] = {
     "Unsecured",
     "WEP",
@@ -15,13 +17,13 @@ static const char * const security_strings[] = {
     "WPA2 Enterprise",
 };
 
-static void wifi_scan_callback(WiFiAccessPoint* wap, BLEWiFiSetupManager* self) {
-    self->wifi_scan_handler(wap);
+static inline void wifi_scan_callback(WiFiAccessPoint* wap, void* data) {
+    BLEWiFiSetupManager::instance().wifi_scan_handler(wap);
 }
 
-static void onDataReceived(const uint8_t* rx_data, size_t len, const BlePeerDevice& peer, void* self) {
+static inline void onDataReceived(const uint8_t* rx_data, size_t len, const BlePeerDevice& peer, void* self) {
     // Is this really the way to do this?
-    ((BLEWiFiSetupManager*)self)->queue_msg(rx_data, len);
+    BLEWiFiSetupManager::instance().ble_data_rx_handler(rx_data, len);
 }
 
 BLEWiFiSetupManager::BLEWiFiSetupManager() 
@@ -32,7 +34,7 @@ BLEWiFiSetupManager::BLEWiFiSetupManager()
 
 void BLEWiFiSetupManager::setup() {
     rxCharacteristic = new BleCharacteristic("rx", BleCharacteristicProperty::NOTIFY, readUUID, serviceUUID);
-    txCharacteristic = new BleCharacteristic("tx", BleCharacteristicProperty::WRITE_WO_RSP, writeUUID, serviceUUID, onDataReceived, this);
+    txCharacteristic = new BleCharacteristic("tx", BleCharacteristicProperty::WRITE_WO_RSP, writeUUID, serviceUUID, onDataReceived, nullptr);
 
     BLE.addCharacteristic(*rxCharacteristic);
     BLE.addCharacteristic(*txCharacteristic);
@@ -117,7 +119,7 @@ void BLEWiFiSetupManager::parse_message() {
         if (iter.name() == "msg_type") {
             // We've received a valid message!
             if (strcmp((const char *)iter.value().toString(), "scan") == 0) {
-                WiFi.scan(wifi_scan_callback, this);
+                WiFi.scan(wifi_scan_callback);
                 BLEWiFiSetupManagerLogger.info("WiFi Scan Complete");
                 // TODO: send status message
             }
@@ -157,7 +159,7 @@ void BLEWiFiSetupManager::parse_message() {
     }
 }
 
-void BLEWiFiSetupManager::queue_msg(const uint8_t* rx_data, size_t len) {
+void BLEWiFiSetupManager::ble_data_rx_handler(const uint8_t* rx_data, size_t len) {
     if( len > 0 ) {
         // The underlying BLE lib reuses the receive buffer, and will not terminate it properly for a string
         // Add some manual processing and properly terminate for string parsing

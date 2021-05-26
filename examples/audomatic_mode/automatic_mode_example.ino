@@ -12,12 +12,10 @@ SerialLogHandler logHandler(LOG_LEVEL_WARN, {
     {"wiring.ble", LOG_LEVEL_ALL},
 });
 
-BLEWiFiSetupManager wifi_manager;
-
 void setup() {   
-    wifi_manager.setup();
+    BLEWiFiSetupManager::instance().setup();
 }
 
 void loop() {
-	wifi_manager.loop();
+	BLEWiFiSetupManager::instance().loop();
 }
