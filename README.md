@@ -1,6 +1,6 @@
 # BLE WiFi Setup Manager Library
 ## About
-This library enables a user of a Particle Argon device to provision WiFi credentials over BLE, including the following functionality:
+This library enables a user of a Particle Argon or P2 device to provision WiFi credentials over BLE, including the following functionality:
 1. Exposes and advertises a custom BLE service for WiFi provisioning
 2. Provides a simple JSON-based communication interface
 3. Enables scanning for nearby WiFi networks
@@ -11,6 +11,7 @@ Future functionality may include:
 - [ ] Clear, get, and set WiFi credentials on the device
 - [ ] Expose ability to turn library on and off in user code (currently it runs all the time)
 - [x] Add callbacks for successful configuration of credentials
+- [x] Support for P2 module
 
 ## Use
 1. Add this library to your project (Name: `ble-wifi-setup-manager)
@@ -36,5 +37,5 @@ All messages are in JSON format. They start with a value `msg_t` that informs ei
 | `msg_t` | Direction | Description | Example |
 |:--------|:------------|:------------|---------:|
 | `scan_resp` | Response from device (`rx`) | Contains details about one WiFi access point that has been found during a scan | `{"msg_t":"scan_resp", "ssid":"MySSID", "sec":"WPA2", "ch":11, "rssi":-53}`|
-| `scan` | Send to device (`tx`) | Initiates WiFi scan on the Argon | `{"msg_type":"scan"}` |
+| `scan` | Send to device (`tx`) | Initiates WiFi scan on the device | `{"msg_type":"scan"}` |
 | `set_creds` | Send to device (`tx`) | Provisions credentials for a given WiFi access point | `{"msg_type":"set_creds","ssid":"MySSID","password":"MyPassword"}` |

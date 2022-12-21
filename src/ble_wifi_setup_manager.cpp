@@ -1,7 +1,7 @@
 #include "ble_wifi_setup_manager.h"
 
-#if PLATFORM_ID != 12 // Argon
-    #error "This library only works on the Argon!"
+#if PLATFORM_ID != PLATFORM_ARGON && PLATFORM_ID != PLATFORM_P2 // Argon or P2 only
+    #error "This library only works on the Argon or P2!"
 #else
 
 Logger BLEWiFiSetupManagerLogger("app.BLEWiFiSetupManager");
